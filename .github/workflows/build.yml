@@ -38,11 +38,10 @@ jobs:
         name: Select variants based on changes
         shell: bash
         env:
-          run: |
-  VARIANTS=$(echo "$ALL_VARIANTS" | python -c "import sys, json; data=json.load(sys.stdin); print(json.dumps(data[:5]))")
-  echo "variants=$VARIANTS" >> $GITHUB_OUTPUT
-        run: |
-          EVENT_NAME="${{ github.event_name }}"
+           ALL_VARIANTS: ${{ steps.list.outputs.all_variants }}
+        run: 
+        
+       EVENT_NAME="${{ github.event_name }}"
 
           # push 到 main 分支，编译全部变体
           if [[ "$EVENT_NAME" == "push" ]]; then
