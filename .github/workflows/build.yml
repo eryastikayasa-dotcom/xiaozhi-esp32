@@ -34,15 +34,20 @@ jobs:
         run: |
           echo "all_variants=$(python scripts/build.py --list-boards --json)" >> $GITHUB_OUTPUT
 
-      - id: select
+       - id: select
         name: Select variants based on changes
-        shell: bash
+        shell: python
         run: |
-          EVENT_NAME="${{ github.event_name }}"
-          if [[ "$EVENT_NAME" == "push" ]]; then
-            echo "variants=${{ steps.list.outputs.all_variants }}" >> $GITHUB_OUTPUT
-            exit 0
-          fi
+          import os, json
+          
+          event_name = "${{ github.event_name }}"
+          all_variants_raw = """${{ steps.list.outputs.all_variants }}"""
+          
+          if event_name == "push":
+              # Validasi dan tulis ke output secara aman tanpa merusak shell bash
+              with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+                  f.write(f"variants={all_variants_raw}\n")
+
   build:
     name: Build ${{ matrix.full_name }}
     needs: prepare
