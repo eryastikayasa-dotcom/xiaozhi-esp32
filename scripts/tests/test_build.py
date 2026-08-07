@@ -691,28 +691,26 @@ class TargetConfigurationTests(unittest.TestCase):
             settings = Path(temp_dir) / "settings.json"
             self.assertFalse(build._sync_vscode_target("esp32s3", settings))
 
-    def test_same_target_does_not_clean_build_directory(self):
-        with (
-            mock.patch.object(build, "_target_from_cmake_cache", return_value="esp32s3"),
-            mock.patch.object(build, "_configured_target", return_value="esp32s3"),
-            mock.patch.object(build, "_run_idf") as run_idf,
-        ):
-            build._prepare_target("esp32s3", preview=False)
-
+        def test_same_target_does_not_clean_build_directory(self):
+        with mock.patch.object(build, "_target_from_cmake_cache", return_value="esp32s3"):
+            with mock.patch.object(build, "_configured_target", return_value="esp32s3"):
+                with mock.patch.object(build, "run_idf") as run_idf:
+                    build._prepare_target("esp32s3", preview=False)
+                    
         run_idf.assert_not_called()
 
-    def test_changed_cmake_target_runs_fullclean_only(self):
-        with (
-            mock.patch.object(build, "_target_from_cmake_cache", return_value="esp32c3"),
-            mock.patch.object(build, "_configured_target", return_value=None),
-            mock.patch.object(build, "_run_idf") as run_idf,
-        ):
-            build._prepare_target("esp32s3", preview=True)
 
+    def test_changed_cmake_target_runs_fullclean_only(self):
+            def test_changed_cmake_target_runs_fullclean_only(self):
+        with mock.patch.object(build, "_target_from_cmake_cache", return_value="esp32s3"):
+            with mock.patch.object(build, "_configured_target", return_value=None):
+                with mock.patch.object(build, "run_idf") as run_idf:
+                    build._prepare_target("esp32s3", preview=True)
+                    
         run_idf.assert_called_once_with(
             "fullclean",
             preview=True,
-        )
+        ) 
 
     def test_configure_build_uses_all_cmake_values_in_one_run(self):
         previous_cwd = Path.cwd()
