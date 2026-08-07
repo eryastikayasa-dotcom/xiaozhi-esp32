@@ -34,19 +34,18 @@ jobs:
         run: |
           echo "all_variants=$(python scripts/build.py --list-boards --json)" >> $GITHUB_OUTPUT
 
-      - id: select
+            - id: select
         name: Select variants based on changes
         shell: bash
-        env:
-          ALL_VARIANTS: ${{ steps.list.outputs.all_variants }}
         run: |
           EVENT_NAME="${{ github.event_name }}"
-
-          # push 到 main 分支，编译全部变体
+          
+          # Jika push ke main branch, langsung gunakan semua varian tanpa ditampung ke env
           if [[ "$EVENT_NAME" == "push" ]]; then
-            echo "variants=$ALL_VARIANTS" >> $GITHUB_OUTPUT
+            echo "variants=${{ steps.list.outputs.all_variants }}" >> $GITHUB_OUTPUT
             exit 0
           fi
+
 
           # pull_request 场景
           # actions/checkout checks out GitHub's synthetic PR merge commit. Its
