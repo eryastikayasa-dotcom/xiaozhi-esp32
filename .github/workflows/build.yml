@@ -22,7 +22,7 @@ jobs:
       variants: ${{ steps.select.outputs.variants }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -34,35 +34,15 @@ jobs:
         run: |
           echo "all_variants=$(python scripts/build.py --list-boards --json)" >> $GITHUB_OUTPUT
 
-            - id: select
+      - id: select
         name: Select variants based on changes
         shell: bash
         run: |
           EVENT_NAME="${{ github.event_name }}"
-          
-          # Jika push ke main branch, langsung gunakan semua varian tanpa ditampung ke env
           if [[ "$EVENT_NAME" == "push" ]]; then
             echo "variants=${{ steps.list.outputs.all_variants }}" >> $GITHUB_OUTPUT
             exit 0
           fi
-
-
-          # pull_request 场景
-          # actions/checkout checks out GitHub's synthetic PR merge commit. Its
-          # first and second parents are the exact base and head commits used
-          # for this run, even when the event SHAs are not exposed as refs in
-          # the job container.
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          BASE_SHA="HEAD^1"
-          HEAD_SHA="HEAD^2"
-          echo "Base: $(git rev-parse "$BASE_SHA"), Head: $(git rev-parse "$HEAD_SHA")"
-
-          CHANGED=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
-          echo -e "Changed files:\n$CHANGED"
-
-          SELECTED=$(printf '%s\n' "$CHANGED" | python scripts/build.py --select-changed)
-          echo "variants=$SELECTED" >> $GITHUB_OUTPUT
-
   build:
     name: Build ${{ matrix.full_name }}
     needs: prepare
