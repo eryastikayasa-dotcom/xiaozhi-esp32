@@ -38,7 +38,9 @@ jobs:
         name: Select variants based on changes
         shell: bash
         env:
-          ALL_VARIANTS: ${{ steps.list.outputs.all_variants }}
+          run: |
+  VARIANTS=$(echo "$ALL_VARIANTS" | python -c "import sys, json; data=json.load(sys.stdin); print(json.dumps(data[:5]))")
+  echo "variants=$VARIANTS" >> $GITHUB_OUTPUT
         run: |
           EVENT_NAME="${{ github.event_name }}"
 
